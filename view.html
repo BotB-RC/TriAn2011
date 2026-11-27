@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#FA6322" />
+    <meta
+      name="description"
+      content="Những lời tri ân gửi đến Thầy Cô nhân ngày Nhà giáo Việt Nam 20/11 - BOTBEE Robotics Club." />
+    <title>Tri ân Thầy Cô 20/11 - BOTBEE Robotics Club</title>
+
+    <!-- Google Fonts (đúng link quy chuẩn trong rule.txt) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&family=Dancing+Script:wght@600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
+      rel="stylesheet" />
+
+    <link rel="stylesheet" href="css/view.css" />
+  </head>
+  <body>
+    <!-- Lớp 0: Ánh sáng rò (Leak Light) + họa tiết halftone theo branding BOTBEE -->
+    <div class="bg-leak" aria-hidden="true"></div>
+
+    <!-- Lớp 0: Ánh sáng lấp lánh (canvas, do view.js vẽ) -->
+    <canvas id="sky-canvas" aria-hidden="true"></canvas>
+
+    <!-- Lớp 2: Các phong thư trôi theo từng hàng (JS sinh các nút .lantern vào đây) -->
+    <div id="lantern-field"></div>
+
+    <!-- Lớp 3: Tiêu đề -->
+    <section class="hero">
+      <h1 class="hero-title">Nhân ngày Nhà giáo Việt Nam 20/11</h1>
+      <p class="hero-sub">Chúng em xin gửi đến quý Thầy Cô đôi lời tri ân.</p>
+      <p class="hero-hint">Chạm vào một phong thư để đọc lời chúc</p>
+      <p class="hero-count" id="wish-count" aria-live="polite"></p>
+    </section>
+
+    <!-- Lớp 3: Họa tiết pixel + logo (đường dẫn tương đối theo rule.txt) -->
+    <span class="deco-pixels" aria-hidden="true"></span>
+    <img
+      class="corner-logo"
+      src="assets/logo-clb.png"
+      alt="BOTBEE Robotics Club"
+      width="520"
+      height="355"
+      decoding="async" />
+
+    <!-- Thanh điều hướng -->
+    <header class="topbar">
+      <a class="btn" href="index.html" id="btn-home" aria-label="Trang chủ">
+        <i data-lucide="home" aria-hidden="true"></i
+        ><span class="label">Trang chủ</span>
+      </a>
+
+      <form class="code-form" id="code-form" autocomplete="off">
+        <label class="sr-only" for="code-input">Mã Thư</label>
+        <input
+          id="code-input"
+          type="text"
+          placeholder="Nhập Mã Thư…"
+          maxlength="300"
+          spellcheck="false" />
+        <button
+          type="submit"
+          class="btn btn-icon"
+          aria-label="Mở thư theo Mã Thư">
+          <i data-lucide="search" aria-hidden="true"></i>
+        </button>
+      </form>
+
+      <button
+        type="button"
+        class="btn"
+        id="panorama-btn"
+        aria-pressed="false"
+        aria-label="Chế độ Toàn cảnh">
+        <i data-lucide="expand" aria-hidden="true"></i
+        ><span class="label" id="panorama-label">Toàn cảnh</span>
+      </button>
+    </header>
+
+    <!-- Trạng thái tải / rỗng / lỗi -->
+    <p class="status" id="status" role="status">Đang gửi những lá thư đến…</p>
+
+    <!-- Đọc thư: phong thư + lá thư -->
+    <div class="overlay" id="letter-overlay" hidden aria-hidden="true">
+      <div class="overlay-backdrop" id="letter-backdrop"></div>
+
+      <div
+        class="letter-stage"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="letter-greeting">
+        <!-- is-read = trạng thái đã đọc (phong thư ẩn, lá thư ở giữa). JS bỏ class này khi chạy hiệu ứng mở -->
+        <div class="letter-scene is-read" id="letter-scene">
+          <div class="env-back" id="env-back" aria-hidden="true"></div>
+
+          <!-- paper-wrap: cắt phần lá thư nằm dưới đáy phong thư khi thư còn "nằm trong bao" -->
+          <div class="paper-wrap" id="paper-wrap">
+            <article class="letter-paper" id="letter-paper">
+              <!-- Thư dài được chia thành nhiều trang (JS tính số trang, chuyển trang bằng hiệu ứng trượt) -->
+              <div
+                class="letter-viewport"
+                id="letter-viewport"
+                role="region"
+                aria-label="Nội dung lá thư">
+                <div class="letter-pages" id="letter-pages">
+                  <p class="letter-greeting" id="letter-greeting">
+                    Kính gửi Quý thầy cô,
+                  </p>
+                  <p class="letter-message" id="letter-message"></p>
+                  <figure class="letter-photo" id="letter-photo" hidden></figure>
+                  <p class="letter-sign" id="letter-sign"></p>
+                  <p class="letter-date" id="letter-date"></p>
+                </div>
+              </div>
+
+              <div class="letter-pager is-single" id="letter-pager">
+                <button
+                  type="button"
+                  class="pager-btn"
+                  id="page-prev"
+                  aria-label="Trang trước">
+                  <i data-lucide="chevron-left" aria-hidden="true"></i>
+                </button>
+                <div class="pager-mid">
+                  <span class="pager-dots" id="pager-dots" aria-hidden="true"></span>
+                  <span class="pager-info" id="page-info" aria-live="polite">1 / 1</span>
+                </div>
+                <button
+                  type="button"
+                  class="pager-btn"
+                  id="page-next"
+                  aria-label="Trang sau">
+                  <i data-lucide="chevron-right" aria-hidden="true"></i>
+                </button>
+              </div>
+            </article>
+          </div>
+
+          <div class="env-front" id="env-front" aria-hidden="true"></div>
+          <div class="env-flap" id="env-flap" aria-hidden="true"></div>
+          <div class="env-seal" id="env-seal" aria-hidden="true"></div>
+        </div>
+
+        <div class="letter-actions" id="letter-actions">
+          <button type="button" class="btn" id="btn-back">
+            <i data-lucide="arrow-left" aria-hidden="true"></i
+            ><span>Quay lại chọn thư khác</span>
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            id="btn-like"
+            aria-pressed="false">
+            <i data-lucide="heart" aria-hidden="true"></i
+            ><span id="like-label">Yêu thích</span>
+            <span class="like-count" id="like-count" hidden>0</span>
+          </button>
+          <button type="button" class="btn" id="btn-copy">
+            <i data-lucide="link" aria-hidden="true"></i
+            ><span>Sao chép liên kết</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <!-- Thư viện (CDN) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+
+    <!-- Logic trang (bắt buộc type="module" theo rule.txt) -->
+    <script type="module" src="js/view.js"></script>
+  </body>
+</html>

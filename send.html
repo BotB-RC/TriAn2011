@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gửi lời tri ân · 20/11</title>
+
+  <!-- Font: link chuẩn của team + thêm Montserrat cho chữ nội dung (body) -->
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&family=Dancing+Script:wght@600;700&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/send.css">
+
+  <!-- Icon: Lucide qua CDN (theo rule). Nếu CDN lỗi vẫn có ký tự thay thế -->
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
+</head>
+<body>
+
+  <!--
+    ===== TRANG GỬI THƯ – 3 BƯỚC (vừa 1 màn hình, không cuộn) =====
+    Bước 1: Viết thư  – tên + lớp ở dòng 1, lời chúc từ dòng 2, hết giấy tự sang tờ mới
+    Bước 2: Ảnh       – chọn ảnh, bấm Hoàn tất → ảnh lần lượt bay vào thiệp
+    Bước 3: Đóng dấu  – bao bì mở ra, thư chui vào, nắp đóng lại, GIỮ 1,5 giây để đóng dấu
+    Mọi chuyển động nằm trong js/send.js (GSAP), CSS chỉ định hình.
+
+    Dữ liệu đẩy lên node "wishes" (6 trường theo rule): id, sender, isAnonymous, message, imageUrl, timestamp
+    LƯU Ý: nhiều ảnh -> imageUrl là các link Cloudinary nối bằng dấu phẩy ",".
+    Trang xem (view.js) tách bằng imageUrl.split(",") (1 ảnh thì không đổi).
+  -->
+
+  <div class="bg" aria-hidden="true">
+    <span class="blob b1"></span>
+    <span class="blob b2"></span>
+    <span class="blob b3"></span>
+  </div>
+
+  <main class="page" id="stage" data-step="0">
+
+    <header class="topbar">
+      <h1 class="brand">Gửi lời tri ân</h1>
+      <nav class="nav">
+        <a class="nav-link" href="index.html">Trang chủ</a>
+        <a class="nav-link" href="view.html">Xem lời chúc</a>
+      </nav>
+    </header>
+
+    <!-- Thanh tiến độ -->
+    <div class="steps-wrap">
+      <div class="steps-track" aria-hidden="true"><div class="steps-fill" id="stepsFill"></div></div>
+      <ol class="steps" id="steps" aria-label="Các bước gửi thư">
+        <li class="is-active">
+          <span class="dot"><span class="dot-num">1</span><i class="dot-check" data-lucide="check">✓</i></span>
+          <span class="txt">Viết thư</span>
+        </li>
+        <li>
+          <span class="dot"><span class="dot-num">2</span><i class="dot-check" data-lucide="check">✓</i></span>
+          <span class="txt">Ảnh kỷ niệm</span>
+        </li>
+        <li>
+          <span class="dot"><span class="dot-num">3</span><i class="dot-check" data-lucide="check">✓</i></span>
+          <span class="txt">Đóng dấu</span>
+        </li>
+      </ol>
+    </div>
+
+    <div class="prompt-wrap">
+      <h2 class="prompt" id="prompt">Nhập lời chúc mà bạn muốn gửi đến thầy cô giáo</h2>
+    </div>
+
+    <!-- Khu vực lá thư (tự co theo màn hình bằng JS) -->
+    <div class="scene-slot" id="sceneSlot">
+      <div class="scene-fit" id="sceneFit">
+        <div class="scene-scale" id="sceneScale">
+          <div class="scene" id="scene">
+
+            <!-- Bao bì (chỉ hiện ở bước 3) -->
+            <div class="env-back" id="envBack"></div>
+
+            <svg class="flap" id="flap" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              <defs>
+                <linearGradient id="fl-g" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#FBF9F3"/>
+                  <stop offset="1" stop-color="#E9E3D3"/>
+                </linearGradient>
+              </defs>
+              <path d="M0 0 L100 0 L50 100 Z" fill="url(#fl-g)"/>
+              <path d="M0 0 L50 100 L100 0" stroke="#fff" stroke-opacity=".8" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+            </svg>
+
+            <!-- Các tờ thiệp -->
+            <div class="sheetstack" id="sheetstack">
+              <article class="sheet sheet-first" id="sheetFirst">
+                <div class="line1">
+                  <label class="l1-label" for="senderName">Từ:</label>
+                  <input class="l1-input l1-name" type="text" id="senderName" maxlength="40" autocomplete="off" placeholder="Tên của bạn">
+                  <label class="l1-label" for="senderClass">Lớp:</label>
+                  <input class="l1-input l1-class" type="text" id="senderClass" maxlength="12" autocomplete="off" placeholder="12A1">
+                  <span class="anon-text">Ẩn danh</span>
+                </div>
+                <textarea class="ta" id="messageFirst" spellcheck="false" aria-label="Lời chúc" placeholder="Em/Con xin gửi đến thầy cô lời cảm ơn chân thành nhất…"></textarea>
+                <span class="sheet-no"></span>
+              </article>
+            </div>
+
+            <!-- Mặt trước bao bì -->
+            <svg class="pocket" id="pocket" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              <defs>
+                <linearGradient id="pk-l" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#FBF8F0"/><stop offset="1" stop-color="#EAE4D4"/>
+                </linearGradient>
+                <linearGradient id="pk-r" x1="1" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#F8F4EA"/><stop offset="1" stop-color="#E6DFCD"/>
+                </linearGradient>
+                <linearGradient id="pk-b" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#F1ECDD"/><stop offset="1" stop-color="#DDD5C1"/>
+                </linearGradient>
+              </defs>
+              <path d="M0 0 L50 52 L0 100 Z" fill="url(#pk-l)"/>
+              <path d="M100 0 L50 52 L100 100 Z" fill="url(#pk-r)"/>
+              <path d="M0 100 L50 52 L100 100 Z" fill="url(#pk-b)"/>
+              <path d="M0 0 L50 52 L100 0" stroke="#fff" stroke-opacity=".8" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+              <path d="M0 100 L50 52 L100 100" stroke="#C9BFA6" stroke-opacity=".6" stroke-width="1" vector-effect="non-scaling-stroke"/>
+            </svg>
+
+            <!-- Con dấu (chỉ 1 con dấu duy nhất) -->
+            <div class="seal" id="seal" aria-hidden="true">
+              <span class="seal-ripple" id="sealRipple"></span>
+              <img class="seal-img" id="sealImg" src="assets/stamp-clb.png" alt="">
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Điều khiển theo từng bước -->
+    <div class="panels" id="panels">
+
+      <section class="panel" data-panel="0" aria-label="Người gửi và lời chúc">
+        <div class="row">
+          <div class="pager">
+            <button type="button" class="pager-btn" id="pagerPrev" aria-label="Tờ trước"><i data-lucide="chevron-left">‹</i></button>
+            <span class="pager-label" id="pagerLabel">Tờ 1/1</span>
+            <button type="button" class="pager-btn" id="pagerNext" aria-label="Tờ sau"><i data-lucide="chevron-right">›</i></button>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="anonToggle">
+            <span class="track" aria-hidden="true"></span>
+            <span class="switch-text">Gửi ẩn danh</span>
+          </label>
+        </div>
+        <p class="hint">Hết giấy, một tờ thiệp mới sẽ tự hiện ra để bạn viết tiếp.</p>
+      </section>
+
+      <section class="panel" data-panel="1" aria-label="Ảnh kỷ niệm">
+        <div class="photo-row">
+          <input class="visually-hidden" type="file" id="imageInput" accept="image/png,image/jpeg,image/webp" multiple>
+          <label class="drop-box" for="imageInput" id="dropBox">
+            <i data-lucide="image-plus">+</i>
+            <span class="drop-text">
+              <b class="drop-main">Chọn ảnh hoặc kéo thả vào đây</b>
+              <small class="drop-sub">JPG, PNG, WebP · dưới 5MB · tối đa 6 ảnh (<span id="photoCount">0/6</span>)</small>
+            </span>
+          </label>
+          <ul class="thumbs" id="thumbs"></ul>
+        </div>
+      </section>
+
+      <section class="panel" data-panel="2" aria-label="Đóng dấu">
+        <button type="button" class="hold-btn" id="holdBtn">
+          <span class="hold-fill" id="holdFill"></span>
+          <span class="hold-label">
+            <b id="holdTitle">Đóng nến sáp</b>
+            <small id="holdHint">Nhấn giữ 1,5 giây</small>
+          </span>
+        </button>
+      </section>
+    </div>
+
+    <div class="actions" id="actions">
+      <button type="button" class="btn-ghost" id="backBtn" hidden>Quay lại</button>
+      <button type="button" class="btn-primary" id="nextBtn"><span>Tiếp tục</span></button>
+    </div>
+
+    <p class="form-error" id="formError" role="alert" hidden></p>
+  </main>
+
+  <!-- Logo góc phải dưới: đã xoá nền, trong suốt hoàn toàn nên ăn theo màu nền của trang -->
+  <img class="corner-logo" src="assets/logo-clb.png" alt="BotBee – Teachers' Day 20/11">
+
+  <!-- Thông báo gửi xong -->
+  <div class="success" id="successModal" role="dialog" aria-modal="true" aria-labelledby="successTitle" hidden>
+    <div class="success-card">
+      <div class="success-lantern" aria-hidden="true"></div>
+      <h2 id="successTitle">Lời chúc đã được gửi đi</h2>
+      <p>Cảm ơn bạn. Lá thư của bạn đang bay lên cùng muôn ngàn lời tri ân khác.</p>
+      <div class="success-actions">
+        <a class="btn-primary" href="view.html">Xem các lời chúc</a>
+        <button type="button" class="btn-ghost" id="writeAgain">Viết thêm một lá thư</button>
+        <a class="link" href="index.html">Về trang chủ</a>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/send.js"></script>
+</body>
+</html>

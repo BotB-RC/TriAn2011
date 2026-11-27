@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản Lý Lời Chúc - BOTBEE</title>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Be Vietnam Pro', sans-serif; background: #FFFBF2; color: #1E293B; margin: 0; padding: 20px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 20px; }
+    h1 { color: #FA6322; text-transform: uppercase; letter-spacing: 1px; margin: 0; font-size: 1.5rem; }
+    .btn-reset { background: #1E293B; color: #F8FAFC; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; }
+    .btn-reset:hover { background: #DC2626; }
+    
+    /* Thanh chuyển Tab */
+    .tabs { display: flex; gap: 10px; border-bottom: 2px solid #FDE68A; padding-bottom: 12px; margin-bottom: 24px; }
+    .tab-btn { padding: 10px 20px; border: 2px solid #F59E0B; background: #fff; color: #1E293B; border-radius: 999px; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
+    .tab-btn.active { background: #FA6322; border-color: #FA6322; color: #fff; }
+    .badge { background: rgba(0,0,0,0.12); padding: 2px 8px; border-radius: 999px; font-size: 0.8rem; }
+    .tab-btn.active .badge { background: rgba(255,255,255,0.25); }
+
+    /* Danh sách thẻ thư */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+    .card { background: #fff; padding: 18px; border-radius: 12px; border: 2px solid #FFDA55; box-shadow: 0 4px 12px rgba(250,99,34,0.08); display: flex; flex-direction: column; }
+    .card.is-approved { border-color: #10B981; }
+    .sender { font-weight: 700; color: #C40000; margin-bottom: 6px; font-size: 1.1rem; }
+    .meta { font-size: 0.8rem; color: #64748B; margin-bottom: 10px; }
+    .msg { white-space: pre-wrap; font-size: 0.95rem; line-height: 1.6; margin-bottom: 12px; flex-grow: 1; }
+    .photos { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 15px; padding-bottom: 5px; }
+    .photos img { width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #E7E1D3; }
+    .actions { display: flex; gap: 10px; margin-top: auto; }
+    .btn { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; transition: 0.2s; }
+    .btn-approve { background: #10B981; }
+    .btn-approve:hover { background: #059669; }
+    .btn-reject { background: #EF4444; }
+    .btn-reject:hover { background: #DC2626; }
+    .empty { text-align: center; grid-column: 1 / -1; color: #64748B; padding: 40px; font-size: 1.05rem; }
+    .error-msg { text-align: center; margin-top: 20vh; color: #C40000; font-size: 1.5rem; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <div class="container" id="app-container">
+    <div class="header">
+      <h1>Quản Lý Lời Chúc BOTBEE</h1>
+      <button class="btn-reset" id="btn-reset-all">🗑️ Xóa sạch toàn bộ dữ liệu (Test lại)</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="pending">
+        Chờ duyệt <span class="badge" id="count-pending">0</span>
+      </button>
+      <button class="tab-btn" data-tab="approved">
+        Đã duyệt (Đang bay) <span class="badge" id="count-approved">0</span>
+      </button>
+    </div>
+
+    <div class="grid" id="wish-list">
+      <div class="empty">Đang kết nối dữ liệu...</div>
+    </div>
+  </div>
+
+  <script type="module">
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('admin') !== 'botbee') {
+      document.getElementById('app-container').innerHTML = "<div class='error-msg'>Truy cập bị từ chối. Sai mã bí mật!</div>";
+      throw new Error("Unauthorized");
+    }
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { firebaseConfig } from "./js/config.js";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const listEl = document.getElementById("wish-list");
+    const countPendingEl = document.getElementById("count-pending");
+    const countApprovedEl = document.getElementById("count-approved");
+    const tabBtns = document.querySelectorAll(".tab-btn");
+
+    let currentTab = "pending"; // 'pending' | 'approved'
+    let pendingData = {};
+    let approvedData = {};
+
+    // Chuyển đổi qua lại giữa 2 Tab
+    tabBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        tabBtns.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentTab = btn.dataset.tab;
+        renderList();
+      });
+    });
+
+    // Lắng nghe dữ liệu Chờ duyệt
+    onValue(ref(db, "pending_wishes"), (snap) => {
+      pendingData = snap.val() || {};
+      countPendingEl.textContent = Object.keys(pendingData).length;
+      if (currentTab === "pending") renderList();
+    });
+
+    // Lắng nghe dữ liệu Đã duyệt
+    onValue(ref(db, "wishes"), (snap) => {
+      approvedData = snap.val() || {};
+      countApprovedEl.textContent = Object.keys(approvedData).length;
+      if (currentTab === "approved") renderList();
+    });
+
+    // Vẽ danh sách thẻ thư theo Tab đang chọn
+    function renderList() {
+      const source = currentTab === "pending" ? pendingData : approvedData;
+      const entries = Object.entries(source).reverse();
+      listEl.innerHTML = "";
+
+      if (entries.length === 0) {
+        listEl.innerHTML = `<div class='empty'>${
+          currentTab === "pending"
+            ? "Tuyệt vời! Không còn thư nào đang chờ duyệt."
+            : "Chưa có thư nào được duyệt lên bầu trời."
+        }</div>`;
+        return;
+      }
+
+      entries.forEach(([id, w]) => {
+        const card = document.createElement("div");
+        card.className = "card" + (currentTab === "approved" ? " is-approved" : "");
+
+        let imgHtml = "";
+        if (w.imageUrl) {
+          const urls = w.imageUrl.split(",").filter(u => u.trim() !== "");
+          if (urls.length > 0) {
+            imgHtml = `<div class="photos">` + urls.map(u => `<a href="${u}" target="_blank"><img src="${u}" alt="Ảnh đính kèm"></a>`).join("") + `</div>`;
+          }
+        }
+
+        const dateStr = w.timestamp ? new Date(w.timestamp).toLocaleString("vi-VN") : "";
+        const actionButtons = currentTab === "pending"
+          ? `<button class="btn btn-approve" data-id="${id}">Duyệt cho bay 🚀</button>
+             <button class="btn btn-reject" data-id="${id}">Xóa bỏ 🗑️</button>`
+          : `<button class="btn btn-reject" data-id="${id}">Gỡ khỏi sổ & Xóa 🗑️</button>`;
+
+        card.innerHTML = `
+          <div class="sender">${w.sender} ${w.isAnonymous ? "(Ẩn danh)" : ""}</div>
+          <div class="meta">Mã thư: ${id} · Gửi lúc: ${dateStr}</div>
+          <div class="msg">${w.message}</div>
+          ${imgHtml}
+          <div class="actions">${actionButtons}</div>
+        `;
+        listEl.appendChild(card);
+      });
+
+      // Xử lý nút Duyệt (chỉ có ở tab Chờ duyệt)
+      document.querySelectorAll(".btn-approve").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+          const id = e.target.dataset.id;
+          const wishData = pendingData[id];
+          if (!wishData) return;
+
+          e.target.textContent = "Đang duyệt...";
+          e.target.disabled = true;
+          try {
+            await set(ref(db, `wishes/${id}`), wishData);
+            await remove(ref(db, `pending_wishes/${id}`));
+          } catch (err) {
+            console.error("Lỗi duyệt thư:", err);
+            e.target.textContent = "Lỗi!";
+          }
+        });
+      });
+
+      // Xử lý nút Xóa (áp dụng cho cả Chờ duyệt lẫn Đã duyệt)
+      document.querySelectorAll(".btn-reject").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+          const id = e.target.dataset.id;
+          const msgConfirm = currentTab === "pending"
+            ? "Xóa vĩnh viễn lời chúc đang chờ duyệt này?"
+            : "Gỡ lời chúc này khỏi trang xem (view.html) và xóa vĩnh viễn?";
+
+          if (confirm(msgConfirm)) {
+            const targetNode = currentTab === "pending" ? `pending_wishes/${id}` : `wishes/${id}`;
+            await remove(ref(db, targetNode));
+            // Xóa luôn lượt thả tim của thư đó nếu có
+            if (currentTab === "approved") {
+              await remove(ref(db, `lights/${id}`));
+            }
+          }
+        });
+      });
+    }
+
+    // Nút xóa sạch toàn bộ dữ liệu để test lại từ đầu
+    document.getElementById("btn-reset-all").addEventListener("click", async () => {
+      const check = prompt("CẢNH BÁO: Thao tác này sẽ xóa SẠCH TẤT CẢ thư chờ duyệt, thư đã duyệt và lượt tim.\nGõ chữ XOA để xác nhận:");
+      if (check === "XOA") {
+        await Promise.all([
+          remove(ref(db, "pending_wishes")),
+          remove(ref(db, "wishes")),
+          remove(ref(db, "lights"))
+        ]);
+        alert("Đã xóa sạch toàn bộ dữ liệu!");
+      }
+    });
+  </script>
+</body>
+</html>

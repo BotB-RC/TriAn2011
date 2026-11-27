@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chào mừng Ngày Nhà giáo Việt Nam · 20/11</title>
+
+  <!-- Google Fonts quy chuẩn theo rule.txt & đồng bộ với send.html -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Dancing+Script:wght@600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/home.css">
+</head>
+<body>
+  <main class="hero">
+    <!-- Lớp phông nền sáng ấm đồng bộ style trang send.css + cánh hoa vàng cam theo ảnh mẫu -->
+    <div class="bg" aria-hidden="true">
+      <span class="blob b1"></span>
+      <span class="blob b2"></span>
+      <span class="blob b3"></span>
+
+      <!-- Cánh hoa ánh sáng mờ góc phải theo đúng ảnh thiết kế mẫu -->
+      <svg class="hero__floral" viewBox="0 0 900 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="petalWarm" cx="50%" cy="50%" r="55%">
+            <stop offset="0%" stop-color="#FACC15" stop-opacity="0.95" />
+            <stop offset="55%" stop-color="#F59E0B" stop-opacity="0.82" />
+            <stop offset="100%" stop-color="#FDE68A" stop-opacity="0" />
+          </radialGradient>
+          <radialGradient id="petalBright" cx="45%" cy="45%" r="55%">
+            <stop offset="0%" stop-color="#FEF08A" stop-opacity="0.98" />
+            <stop offset="60%" stop-color="#FACC15" stop-opacity="0.88" />
+            <stop offset="100%" stop-color="#F59E0B" stop-opacity="0" />
+          </radialGradient>
+          <linearGradient id="petalSoftPink" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#FDFBF7" stop-opacity="0.92" />
+            <stop offset="50%" stop-color="#FECDD3" stop-opacity="0.52" />
+            <stop offset="100%" stop-color="#FDE68A" stop-opacity="0.2" />
+          </linearGradient>
+          <filter id="softBlur" x="-25%" y="-25%" width="150%" height="150%">
+            <feGaussianBlur stdDeviation="24" />
+          </filter>
+          <filter id="deepBlur" x="-35%" y="-35%" width="170%" height="170%">
+            <feGaussianBlur stdDeviation="42" />
+          </filter>
+        </defs>
+
+        <ellipse cx="780" cy="240" rx="260" ry="120" transform="rotate(-32 780 240)" fill="url(#petalSoftPink)" filter="url(#deepBlur)" />
+        <ellipse cx="830" cy="340" rx="280" ry="135" transform="rotate(-18 830 340)" fill="url(#petalWarm)" filter="url(#deepBlur)" />
+        <ellipse cx="670" cy="480" rx="220" ry="110" transform="rotate(-28 670 480)" fill="url(#petalBright)" filter="url(#softBlur)" />
+        <ellipse cx="770" cy="560" rx="250" ry="125" transform="rotate(14 770 560)" fill="url(#petalBright)" filter="url(#softBlur)" />
+        <ellipse cx="640" cy="650" rx="230" ry="115" transform="rotate(36 640 650)" fill="url(#petalWarm)" filter="url(#softBlur)" />
+        <circle cx="730" cy="530" r="150" fill="#FACC15" opacity="0.75" filter="url(#deepBlur)" />
+      </svg>
+
+      <!-- Lớp hạt grain mịn tạo chất cảm giấy thiệp như trang send -->
+      <div class="hero__grain"></div>
+    </div>
+
+    <!-- Lớp bụi nắng nhẹ nhàng bay trên nền -->
+    <div class="dust-layer" aria-hidden="true"></div>
+
+    <!-- Thanh điều hướng trên cùng: 2 nút ở 2 góc trái và phải, tối giản hòa hợp với background -->
+    <header class="topbar">
+      <a class="top-action top-action--primary" href="send.html">
+        <svg class="top-action__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9"></path>
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+        </svg>
+        <span>VIẾT LỜI TRI ÂN</span>
+      </a>
+
+      <a class="top-action top-action--secondary" href="view.html">
+        <svg class="top-action__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+        </svg>
+        <span>CUỐN SỔ TRI ÂN</span>
+      </a>
+    </header>
+
+    <!-- Nội dung chính theo đúng bố cục ảnh thiết kế -->
+    <section class="content">
+      <div class="title-group">
+        <h1 class="title">
+          <span class="title__line">CHÀO MỪNG</span>
+          <span class="title__line">NGÀY NHÀ GIÁO VIỆT NAM</span>
+        </h1>
+
+        <!-- Dòng ca dao & nguồn nằm ngay dưới chữ Ngày Nhà giáo Việt Nam (không có bảng, chữ chạy mượt từ trái sang phải) -->
+        <div class="proverb-minimal" id="proverb-box" aria-live="polite">
+          <blockquote class="proverb-minimal__quote" id="chalk-quote"></blockquote>
+          <cite class="proverb-minimal__author" id="chalk-author"></cite>
+        </div>
+      </div>
+
+      <p class="date" aria-label="Ngày 20 tháng 11">20/11</p>
+    </section>
+
+    <!-- Hai ô vuông trắng chéo nhau ở góc dưới trái (theo đúng ảnh mẫu) -->
+    <div class="checker" aria-hidden="true">
+      <span class="checker__sq checker__sq--top-right"></span>
+      <span class="checker__sq checker__sq--bottom-left"></span>
+    </div>
+
+    <!-- Logo CLB góc dưới phải theo ảnh mẫu (tự ẩn nếu chưa có file ảnh) -->
+    <img
+      class="corner-logo"
+      src="assets/logo-clb.png"
+      alt="BOT BEE Robotics Club"
+      draggable="false"
+      onerror="this.style.display='none'"
+    >
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script type="module" src="js/home.js"></script>
+</body>
+</html>
