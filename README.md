@@ -17,7 +17,7 @@
 | **Trang View** *(Xem thư)* | [Tên thành viên 5]<br>[Tên thành viên 6] | [@username5](https://github.com/username5)<br>[@username6](https://github.com/username6) |
 
 ## 2. Giới thiệu Project
-* **Mục đích:** 
+* **Mục đích:** Tạo không gian trực tuyến để học sinh gửi lời chúc, đồng thời lưu trữ những lời tri ân  đến quý Thầy Cô nhân dịp 20/11.
 * **Ý tưởng & Chức năng chính:**
   * **Trang Home:** [Mô tả ngắn gọn chức năng]
   * **Trang Send:** [Mô tả ngắn gọn chức năng]
@@ -25,7 +25,7 @@
 
 ## 3. Quá trình thực hiện
 * **Công nghệ & Công cụ sử dụng:** [Công cụ đã sử dụng]
-* **Tóm tắt quá trình triển khai theo nhóm:**
+* **Quá trình triển khai theo nhóm:**
   * **Nhóm Home:** [Mô tả ngắn gọn công việc đã làm]
   * **Nhóm Send:** [Mô tả ngắn gọn công việc đã làm]
   * **Nhóm View:** [Mô tả ngắn gọn công việc đã làm]
