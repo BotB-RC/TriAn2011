@@ -6,8 +6,6 @@
 * **Thời gian thực hiện:** 13/11/2026 - 17/11/2026
 * **Trạng thái:** Hoàn thành
 * **Link truy cập:** https://botb-rc.github.io/?t=TriAn20/11
-* **Hình ảnh minh họa:** 
-  *(Chèn ảnh chụp màn hình 3 trang Home, Send, View vào thư mục repo và gắn link tại đây)*
 * **Người thực hiện:**
 
 | Nhóm phụ trách | Thành viên | GitHub |
