@@ -12,6 +12,7 @@
 
 | Nhóm phụ trách | Thành viên | GitHub |
 | :--- | :--- | :--- |
+| **Nhóm trưởng** *(Leader)* | Nguyễn Nam Phong | [@091287xdsd-bit](https://github.com/091287xdsd-bit) |
 | **Trang Home** *(Trang chủ)* | [Tên thành viên 1]<br>[Tên thành viên 2] | [@username1](https://github.com/username1)<br>[@username2](https://github.com/username2) |
 | **Trang Send** *(Gửi thư)* | [Tên thành viên 3]<br>[Tên thành viên 4] | [@username3](https://github.com/username3)<br>[@username4](https://github.com/username4) |
 | **Trang View** *(Xem thư)* | [Tên thành viên 5]<br>[Tên thành viên 6] | [@username5](https://github.com/username5)<br>[@username6](https://github.com/username6) |
